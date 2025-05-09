@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Status do LED</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans antialiased">
+
+  <div class="max-w-4xl mx-auto mt-10 px-6">
+    <h1 class="text-4xl font-bold text-center text-blue-400 mb-8">
+      Painel de Status do LED
+    </h1>
+
+    <div class="bg-gray-800 p-6 rounded-2xl shadow-xl ring-1 ring-gray-700">
+      <div id="status-container">
+        {% if estado_atual %}
+        
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-gray-700 p-4 rounded-xl hover:bg-gray-600 transition" id="status">
+            <span class="text-xl font-semibold">{{ estado_atual[2] }}</span>
+            <span class="text-lg mt-2 sm:mt-0 sm:ml-4">
+              <span class="font-bold {% if estado_atual[0] == 'ligar' %} text-red-400 {% else %} text-green-400 {% endif %}">
+                {{ estado_atual[0].upper() }}
+              </span>
+            </span>
+          </div>
+        {% else %}
+          
+          <div class="text-center text-gray-400" id="status">
+            Nenhuma mensagem recebida ainda.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Função que faz a requisição AJAX para atualizar o status
+    function atualizarStatus() {
+      $.get("/atualizar_status", function(data) {
+        if (data.estado) {
+          // Atualiza a página com o novo estado
+          $('#status').html(`
+            <span class="text-xl font-semibold">${data.hora}</span>
+            <span class="text-lg mt-2 sm:mt-0 sm:ml-4">
+              <span class="font-bold ${data.estado == 'ligar' ? 'text-green-400' : 'text-red-400'}">
+                ${data.estado.toUpperCase()}
+              </span>
+            </span>
+          `);
+        } else {
+          $('#status').html('<div class="text-center text-gray-400">Nenhuma mensagem recebida ainda.</div>');
+        }
+      });
+    }
+
+    // Atualiza o status a cada 5 segundos
+    setInterval(atualizarStatus, 5000);
+  </script>
+
+</body>
+</html>
